@@ -1,180 +1,96 @@
-import { db } from './firebase';
-import { type User, type InsertUser, type Favor, type InsertFavor, type Review, type InsertReview } from "@shared/schema";
-import { type DocumentData } from 'firebase-admin/firestore';
+import { users, favors, reviews, type User, type InsertUser, type Favor, type InsertFavor, type Review, type InsertReview } from "@shared/schema";
 
 export interface IStorage {
   // Users
   getUser(id: number): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<User>): Promise<User>;
-
+  
   // Favors
   getFavor(id: number): Promise<Favor | undefined>;
   getFavors(): Promise<Favor[]>;
   getFavorsByCategory(category: string): Promise<Favor[]>;
   createFavor(favor: InsertFavor): Promise<Favor>;
   updateFavorStatus(id: number, status: string, helperId?: number): Promise<Favor>;
-
+  
   // Reviews
   getReviews(userId: number): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
 }
 
-export class FirebaseStorage implements IStorage {
-  private usersRef = db.collection('users');
-  private favorsRef = db.collection('favors');
-  private reviewsRef = db.collection('reviews');
+export class MemStorage implements IStorage {
+  private users: Map<number, User>;
+  private favors: Map<number, Favor>;
+  private reviews: Map<number, Review>;
+  private currentIds: { users: number; favors: number; reviews: number };
+
+  constructor() {
+    this.users = new Map();
+    this.favors = new Map();
+    this.reviews = new Map();
+    this.currentIds = { users: 1, favors: 1, reviews: 1 };
+  }
 
   async getUser(id: number): Promise<User | undefined> {
-    try {
-      const doc = await this.usersRef.doc(id.toString()).get();
-      if (!doc.exists) return undefined;
-      return { id, ...doc.data() as Omit<User, 'id'> };
-    } catch (error) {
-      console.error('Error getting user:', error);
-      throw error;
-    }
+    return this.users.get(id);
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    try {
-      const id = Date.now(); // Simple auto-increment simulation
-      const user: User = {
-        id,
-        ...insertUser,
-        askedCount: 0,
-        doneCount: 0,
-        earned: "0",
-        skills: insertUser.skills || [],
-        avatar: insertUser.avatar || null,
-        about: insertUser.about || null,
-      };
-      await this.usersRef.doc(id.toString()).set(user);
-      return user;
-    } catch (error) {
-      console.error('Error creating user:', error);
-      throw error;
-    }
+    const id = this.currentIds.users++;
+    const user = { ...insertUser, id, askedCount: 0, doneCount: 0, earned: "0" };
+    this.users.set(id, user);
+    return user;
   }
 
   async updateUser(id: number, update: Partial<User>): Promise<User> {
-    try {
-      const userRef = this.usersRef.doc(id.toString());
-      const doc = await userRef.get();
-      if (!doc.exists) throw new Error("User not found");
-
-      const updated = { ...doc.data(), ...update } as Omit<User, 'id'>;
-      await userRef.update(updated);
-      return { id, ...updated };
-    } catch (error) {
-      console.error('Error updating user:', error);
-      throw error;
-    }
+    const user = await this.getUser(id);
+    if (!user) throw new Error("User not found");
+    const updated = { ...user, ...update };
+    this.users.set(id, updated);
+    return updated;
   }
 
   async getFavor(id: number): Promise<Favor | undefined> {
-    try {
-      const doc = await this.favorsRef.doc(id.toString()).get();
-      if (!doc.exists) return undefined;
-      return { id, ...doc.data() as Omit<Favor, 'id'> };
-    } catch (error) {
-      console.error('Error getting favor:', error);
-      throw error;
-    }
+    return this.favors.get(id);
   }
 
   async getFavors(): Promise<Favor[]> {
-    try {
-      const snapshot = await this.favorsRef.get();
-      return snapshot.docs.map(doc => ({
-        id: parseInt(doc.id),
-        ...doc.data() as Omit<Favor, 'id'>
-      }));
-    } catch (error) {
-      console.error('Error getting favors:', error);
-      throw error;
-    }
+    return Array.from(this.favors.values());
   }
 
   async getFavorsByCategory(category: string): Promise<Favor[]> {
-    try {
-      const snapshot = await this.favorsRef
-        .where('category', '==', category)
-        .get();
-      return snapshot.docs.map(doc => ({
-        id: parseInt(doc.id),
-        ...doc.data() as Omit<Favor, 'id'>
-      }));
-    } catch (error) {
-      console.error('Error getting favors by category:', error);
-      throw error;
-    }
+    return Array.from(this.favors.values()).filter(
+      (favor) => favor.category === category
+    );
   }
 
   async createFavor(insertFavor: InsertFavor): Promise<Favor> {
-    try {
-      const id = Date.now(); // Simple auto-increment simulation
-      const favor: Favor = {
-        id,
-        ...insertFavor,
-        status: "open",
-        helperId: null,
-        otherCategoryDetail: insertFavor.otherCategoryDetail || null,
-      };
-      await this.favorsRef.doc(id.toString()).set(favor);
-      return favor;
-    } catch (error) {
-      console.error('Error creating favor:', error);
-      throw error;
-    }
+    const id = this.currentIds.favors++;
+    const favor = { ...insertFavor, id, status: "open", helperId: null };
+    this.favors.set(id, favor);
+    return favor;
   }
 
   async updateFavorStatus(id: number, status: string, helperId?: number): Promise<Favor> {
-    try {
-      const favorRef = this.favorsRef.doc(id.toString());
-      const doc = await favorRef.get();
-      if (!doc.exists) throw new Error("Favor not found");
-
-      const updated = { ...doc.data(), status, helperId } as Omit<Favor, 'id'>;
-      await favorRef.update(updated);
-      return { id, ...updated };
-    } catch (error) {
-      console.error('Error updating favor status:', error);
-      throw error;
-    }
+    const favor = await this.getFavor(id);
+    if (!favor) throw new Error("Favor not found");
+    const updated = { ...favor, status, helperId };
+    this.favors.set(id, updated);
+    return updated;
   }
 
   async getReviews(userId: number): Promise<Review[]> {
-    try {
-      const snapshot = await this.reviewsRef
-        .where('userId', '==', userId)
-        .orderBy('createdAt', 'desc')
-        .get();
-      return snapshot.docs.map(doc => ({
-        id: parseInt(doc.id),
-        ...doc.data() as Omit<Review, 'id'>
-      }));
-    } catch (error) {
-      console.error('Error getting reviews:', error);
-      throw error;
-    }
+    return Array.from(this.reviews.values()).filter(
+      (review) => review.userId === userId
+    );
   }
 
   async createReview(insertReview: InsertReview): Promise<Review> {
-    try {
-      const id = Date.now(); // Simple auto-increment simulation
-      const review: Review = {
-        id,
-        ...insertReview,
-        createdAt: new Date(),
-      };
-      await this.reviewsRef.doc(id.toString()).set(review);
-      return review;
-    } catch (error) {
-      console.error('Error creating review:', error);
-      throw error;
-    }
+    const id = this.currentIds.reviews++;
+    const review = { ...insertReview, id };
+    this.reviews.set(id, review);
+    return review;
   }
 }
 
-export const storage = new FirebaseStorage();
+export const storage = new MemStorage();

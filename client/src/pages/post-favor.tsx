@@ -9,29 +9,12 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-
-const categories = [
-  { value: "delivery", label: "Delivery" },
-  { value: "pet-care", label: "Pet Care" },
-  { value: "cleaning", label: "Cleaning" },
-  { value: "errands", label: "Errands" },
-  { value: "handyman", label: "Handyman" },
-  { value: "others", label: "Others" },
-];
 
 export default function PostFavor() {
   const [, navigate] = useLocation();
@@ -44,8 +27,6 @@ export default function PostFavor() {
       price: "",
       location: "",
       category: "delivery",
-      when: new Date().toISOString(),
-      otherCategoryDetail: "",
       userId: 1, // Hardcoded for demo
     },
   });
@@ -94,7 +75,6 @@ export default function PostFavor() {
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -113,7 +93,6 @@ export default function PostFavor() {
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -131,73 +110,6 @@ export default function PostFavor() {
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="bg-white">
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem
-                            key={category.value}
-                            value={category.value}
-                          >
-                            {category.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {form.watch("category") === "others" && (
-                <FormField
-                  control={form.control}
-                  name="otherCategoryDetail"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Please give more detail</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Describe the category"
-                          className="bg-white"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-
-              <FormField
-                control={form.control}
-                name="when"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>When?</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="datetime-local"
-                        className="bg-white"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />

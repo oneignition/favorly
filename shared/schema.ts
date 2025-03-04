@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, decimal, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, decimal } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -20,8 +20,6 @@ export const favors = pgTable("favors", {
   location: text("location").notNull(),
   status: text("status").notNull().default("open"),
   category: text("category").notNull(),
-  when: timestamp("when").notNull(),
-  otherCategoryDetail: text("other_category_detail"),
   userId: integer("user_id").notNull(),
   helperId: integer("helper_id"),
 });
@@ -32,7 +30,6 @@ export const reviews = pgTable("reviews", {
   comment: text("comment").notNull(),
   userId: integer("user_id").notNull(),
   favorId: integer("favor_id").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -47,13 +44,7 @@ export const insertFavorSchema = createInsertSchema(favors).pick({
   price: true,
   location: true,
   category: true,
-  when: true,
-  otherCategoryDetail: true,
   userId: true,
-}).extend({
-  category: z.enum(["delivery", "pet-care", "cleaning", "errands", "handyman", "others"]),
-  when: z.coerce.date(),
-  otherCategoryDetail: z.string().optional(),
 });
 
 export const insertReviewSchema = createInsertSchema(reviews);
