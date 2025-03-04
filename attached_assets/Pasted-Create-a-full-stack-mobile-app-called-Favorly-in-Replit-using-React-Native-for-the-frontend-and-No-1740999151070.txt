@@ -1,0 +1,17 @@
+Create a full-stack mobile app called "Favorly" in Replit using React Native for the frontend and Node.js with Express for the backend. Use Expo to ensure mobile compatibility (iOS and Android). Integrate Firebase for database (Firestore) and storage (photo uploads), and Stripe for payment processing. Set up the project with 'npm install react react-native @react-navigation/native @react-navigation/bottom-tabs firebase stripe expo-cli express' and initialize Expo with a blank template.
+
+Design three screens with the following UI and functionality, matching the provided v0 designs:
+
+1. **Post Favor Screen**:
+   - UI: Green header "Ask for a Favor", a form with three fields ("What’s the favor?" with placeholder "e.g., Deliver my book", "How much?" with placeholder "$ e.g., 5", "Where?" with placeholder "e.g., 123 Main St"), and a yellow "Post" button (full-width, rounded). White background, soft blue (#BBDEFB) form, 10px padding.
+   - Functionality: On "Post" button press, save the favor (title, price, location) to Firestore with status "open" and redirect to Home screen.
+
+2. **Profile Screen**:
+   - UI: Header with "Alex", a 200x200px circular avatar placeholder with a blue "Upload Photo" button, "About Me" text area (200-character limit, placeholder "Hi, I’m Alex! Love helping with pet care and errands in Downtown."), "Stats" section (green text: "Asked: 10 | Done: 5 | Earned: $50" - conditional for doers), "Reviews" section (yellow 4.5/5 rating, two reviews like "Great walker! - Mar 1, 2025" with scrollbar for more, "See All" yellow button), "Pending Favors" section (one card: "Dog walk - $10, Claimed by Jamie"), green skill tags ("Pet Care 🐶", "Delivery 🚚", "Errands"), blue "Message" button, gray "Settings" link, yellow "Log Out" button. White background, soft blue (#BBDEFB) cards, 10px spacing.
+   - Functionality: Allow photo upload to Firebase Storage, fetch stats and reviews from Firestore, enable in-app messaging (stub with alert), and log out (clear session).
+
+3. **Home Screen**:
+   - UI: "Favorly" header, search bar, category tabs (All, Delivery, Pet Care, Cleaning, Errands, Handyman in blue), a 200x200px "Map Placeholder" rectangle, "Nearby Favors" section with three cards (e.g., "Pick groceries - $15" with price circle, description, "Help Out" yellow button, category icon 🐶/🚚/🔧), gray loading spinner. White background, green (#4CAF50) headers, soft blue cards, 10px spacing.
+   - Functionality: Fetch favors from Firestore based on location (stub with dummy data), filter by category, and navigate to Profile on "Help Out".
+
+Set up a bottom tab navigator with Home, Post Favor, and Profile screens. Use Firebase Firestore to store favors (title, price, location, status, userId) and user data (name, stats, reviews), Firebase Storage for photo uploads, and Stripe for payment processing (create a /pay endpoint taking $10, deducting 2.9% + $0.30 fee, splitting 10% to Favorly, 90% to doer). Implement a basic Express server on port 3000 with endpoints: /post-favor (POST to save favor), /get-favors (GET to fetch nearby favors), and /pay (POST for payment). Ensure mobile responsiveness with vertical scrolling and tap-friendly buttons. Deploy the app and provide run instructions.

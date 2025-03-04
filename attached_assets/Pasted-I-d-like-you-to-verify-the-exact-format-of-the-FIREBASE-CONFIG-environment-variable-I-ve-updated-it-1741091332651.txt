@@ -1,0 +1,33 @@
+I’d like you to verify the exact format of the FIREBASE_CONFIG environment variable. I’ve updated it in the Secrets panel with the full, single-line service account string. Please check the format, reinitialize the Firebase Admin SDK, test the /post-favor endpoint, and provide any error logs if the issue persists. If successful, proceed with the following, keeping all existing features:
+
+- **Post Favor Screen**:
+  - Add a “Category” column with a dropdown (options: Delivery, Pet Care, Cleaning, Errands, Handyman, Others). When “Others” is selected, show a text input for “Please give more detail.”
+  - Add a “When” field with a date and time picker.
+  - Ensure the form saves category and “When” to Firestore via /post-favor, redirecting to Home.
+
+- **Home Screen**:
+  - Display distance from the current location for each favor (e.g., “0.5 miles away”).
+  - Allow manual location selection or use current location.
+  - Enable category filtering (e.g., clicking “Delivery” shows only delivery favors) by fetching filtered data from /get-favors.
+  - Add a gray loading spinner while fetching favors.
+
+- **New Favor Details Screen**:
+  - Create a screen when clicking “Help Out” (e.g., “Pick groceries - $15, Downtown Market”) with a blue “Upload Proof” button (photo placeholder) and yellow “Mark as Done” button. Save proof to Firebase Storage and update favor status in Firestore.
+
+- **Profile Screen**:
+  - Ensure “Reviews” includes comments/dates (e.g., “Great walker! - Mar 1, 2025”) and add a “See All” link.
+  - Keep existing stats, pending favors, skills, and actions.
+
+- **Backend Integration**:
+  - Use FIREBASE_CONFIG to initialize Firebase Admin SDK. Set up Firestore with ‘favors’ (fields: title, price, location, status, userId, category, when) and ‘users’ (fields: name, stats, reviews). Implement Firebase Storage for photo uploads.
+  - Use STRIPE_SECRET_KEY for a /pay endpoint (POST) processing $10, deducting 2.9% + $0.30 fee, splitting 10% to Favorly, 90% to doer.
+  - Set up Express server on port 3000 with /post-favor (POST), /get-favors (GET with category/location filters), /pay (POST). Add comments for manual key checks.
+
+- **Additional Features**:
+  - Add user authentication with Firebase Authentication (login/signup).
+  - Implement a rating system (1-5 stars) post-favor completion, saving to Firestore.
+  - Add a “Past Favors” section to Profile.
+
+- **Testing and Deployment**: Verify Firestore saves data (e.g., post a favor with category and “When”), test Stripe with a test card, and deploy with run instructions.
+
+Please implement these updates and confirm all functionality works.
